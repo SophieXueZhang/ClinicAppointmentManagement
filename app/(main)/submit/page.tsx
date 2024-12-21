@@ -2,11 +2,6 @@
 
 import { useState } from 'react';
 import { QuillEditor } from '@/components/quill-editor';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function SubmitPage() {
   const [content, setContent] = useState('');
@@ -15,60 +10,61 @@ export default function SubmitPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement submission logic
     console.log({ title, category, content });
   };
 
   return (
     <div className="container mx-auto py-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>创建投稿</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="title">标题</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="请输入标题"
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+        <h1 className="text-2xl font-bold mb-6">创建投稿</h1>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label htmlFor="title" className="block text-sm font-medium mb-2">标题</label>
+            <input
+              type="text"
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="请输入标题"
+              className="w-full p-2 border rounded"
+            />
+          </div>
+          
+          <div>
+            <label htmlFor="category" className="block text-sm font-medium mb-2">分类</label>
+            <select
+              id="category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full p-2 border rounded"
+            >
+              <option value="">选择分类</option>
+              <option value="technology">技术</option>
+              <option value="design">设计</option>
+              <option value="resources">资源</option>
+              <option value="other">其他</option>
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="content" className="block text-sm font-medium mb-2">内容</label>
+            <div className="min-h-[400px]">
+              <QuillEditor
+                value={content}
+                onChange={setContent}
+                placeholder="请输入内容..."
               />
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="category">分类</Label>
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger>
-                  <SelectValue placeholder="选择分类" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="technology">技术</SelectItem>
-                  <SelectItem value="design">设计</SelectItem>
-                  <SelectItem value="resources">资源</SelectItem>
-                  <SelectItem value="other">其他</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="content">内容</Label>
-              <div className="min-h-[400px]">
-                <QuillEditor
-                  value={content}
-                  onChange={setContent}
-                  placeholder="请输入内容..."
-                />
-              </div>
-            </div>
-
-            <Button type="submit" className="w-full">
-              提交
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+          <button 
+            type="submit" 
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+          >
+            提交
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

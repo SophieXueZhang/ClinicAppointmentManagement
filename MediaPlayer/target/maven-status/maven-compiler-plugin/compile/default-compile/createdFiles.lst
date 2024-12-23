@@ -1,0 +1,13 @@
+com/mediaplayer/Main.class
+com/mediaplayer/util/FileDrop.class
+com/mediaplayer/util/FileDrop$FileDropListener.class
+com/mediaplayer/application/AdvancedMediaPlayer.class
+com/mediaplayer/application/AdvancedMediaPlayer$1.class
+com/mediaplayer/util/FileDrop$1.class
+com/mediaplayer/ui/components/CustomControlPanel.class
+com/mediaplayer/ui/components/CustomControlPanel$1.class
+com/mediaplayer/service/LyricsManager.class
+com/mediaplayer/config/PlayerConfig.class
+com/mediaplayer/service/PlaylistManager.class
+com/mediaplayer/util/TimeUtils.class
+com/mediaplayer/event/MediaEventAdapter.class

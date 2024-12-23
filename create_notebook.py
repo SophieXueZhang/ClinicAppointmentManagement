@@ -37,6 +37,142 @@ from qr_transfer import (
 )'''
 
 # Test file preparation
+markdown_missing_input = """## 缺失输入处理
+
+系统能够优雅地处理各种输入错误情况：
+- 文件不存在
+- 权限不足
+- 文件损坏
+- 目录不可访问
+- 磁盘空间不足
+
+下面演示如何处理这些错误情况。"""
+
+code_missing_input = '''# 演示各种输入错误处理
+import os
+import shutil
+from pathlib import Path
+
+def test_input_scenarios():
+    """测试各种输入错误场景"""
+    scenarios = [
+        ("不存在的文件", "nonexistent.txt", "qr_codes"),
+        ("权限受限的目录", "test.txt", "/root/restricted"),
+        ("磁盘空间不足", "test.txt", "no_space"),
+        ("损坏的输入文件", "corrupted.txt", "qr_codes")
+    ]
+    
+    # 创建测试文件
+    with open("test.txt", "w") as f:
+        f.write("测试内容")
+    
+    # 创建损坏的文件
+    with open("corrupted.txt", "wb") as f:
+        f.write(b"\\xFF\\xFF\\xFF")  # 无效的UTF-8数据
+    
+    for scenario_name, input_file, output_dir in scenarios:
+        print(f"\\n测试场景：{scenario_name}")
+        try:
+            # 尝试处理输入
+            print(f"处理文件：{input_file}")
+            print(f"输出目录：{output_dir}")
+            
+            # 验证输入文件
+            if not os.path.exists(input_file):
+                raise FileNotFoundError(f"输入文件不存在：{input_file}")
+            
+            # 验证输出目录权限
+            try:
+                os.makedirs(output_dir, exist_ok=True)
+            except PermissionError:
+                raise PermissionError(f"无权限创建目录：{output_dir}")
+            
+            # 检查磁盘空间
+            if output_dir == "no_space":
+                raise OSError("磁盘空间不足")
+            
+            # 尝试读取文件
+            with open(input_file, "r") as f:
+                content = f.read()
+                print(f"成功读取文件内容：{content[:50]}...")
+                
+        except Exception as e:
+            print(f"错误：{str(e)}")
+            print("建议解决方案：")
+            if isinstance(e, FileNotFoundError):
+                print("- 检查文件路径是否正确")
+                print("- 确认文件名大小写")
+                print("- 验证文件是否被移动或删除")
+            elif isinstance(e, PermissionError):
+                print("- 检查文件/目录权限")
+                print("- 使用适当的用户权限运行程序")
+            elif isinstance(e, OSError):
+                print("- 清理磁盘空间")
+                print("- 选择其他输出位置")
+            else:
+                print("- 检查文件编码")
+                print("- 确保文件未被损坏")
+        
+        print("\\n---")
+
+    # 清理测试文件
+    os.remove("test.txt")
+    os.remove("corrupted.txt")
+
+# 运行测试场景
+test_input_scenarios()'''
+
+markdown_path_handling = """## 输入输出路径处理
+
+在使用QR码传输系统之前，我们需要了解如何正确处理输入和输出路径。系统支持以下路径处理功能：
+- 相对路径和绝对路径
+- 自动创建输出目录
+- 路径验证和规范化
+- 特殊字符处理
+
+让我们通过示例来了解这些功能。"""
+
+code_path_handling = '''# 演示路径处理
+import os
+from pathlib import Path
+
+def setup_paths(input_path, output_dir):
+    """设置并验证输入输出路径"""
+    # 转换为绝对路径
+    input_path = os.path.abspath(input_path)
+    output_dir = os.path.abspath(output_dir)
+    
+    # 验证输入文件
+    if not os.path.exists(input_path):
+        raise FileNotFoundError(f"输入文件不存在：{input_path}")
+    
+    # 创建输出目录
+    os.makedirs(output_dir, exist_ok=True)
+    
+    return input_path, output_dir
+
+# 演示不同的路径格式
+paths_to_try = [
+    ("./test_file.txt", "./qr_codes"),  # 相对路径
+    (os.path.abspath("test_file.txt"), os.path.abspath("qr_codes")),  # 绝对路径
+    ("test_file.txt", "qr_codes/subfolder"),  # 子目录
+]
+
+for input_path, output_dir in paths_to_try:
+    try:
+        print(f"\\n处理路径：")
+        print(f"输入：{input_path}")
+        print(f"输出：{output_dir}")
+        
+        normalized_input, normalized_output = setup_paths(input_path, output_dir)
+        
+        print("规范化后的路径：")
+        print(f"输入：{normalized_input}")
+        print(f"输出：{normalized_output}")
+        
+    except Exception as e:
+        print(f"错误：{str(e)}")'''
+
 markdown_test_prep = """## 准备测试文件
 
 首先，我们创建一个简单的测试文件来演示系统功能。"""
@@ -153,6 +289,10 @@ if os.path.exists(output_dir):
 cells = [
     nbf.v4.new_markdown_cell(markdown_intro),
     nbf.v4.new_code_cell(code_imports),
+    nbf.v4.new_markdown_cell(markdown_missing_input),
+    nbf.v4.new_code_cell(code_missing_input),
+    nbf.v4.new_markdown_cell(markdown_path_handling),
+    nbf.v4.new_code_cell(code_path_handling),
     nbf.v4.new_markdown_cell(markdown_test_prep),
     nbf.v4.new_code_cell(code_test_prep),
     nbf.v4.new_markdown_cell(markdown_json),

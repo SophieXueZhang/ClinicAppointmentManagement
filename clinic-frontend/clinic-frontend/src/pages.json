@@ -1,0 +1,62 @@
+{
+"pages": [
+{
+"path": "pages/movie/list",
+"style": {
+"navigationBarTitleText": "电影列表"
+}
+},
+{
+"path": "pages/user/login",
+"style": {
+"navigationBarTitleText": "用户登录"
+}
+},
+{
+"path": "pages/user/register",
+"style": {
+"navigationBarTitleText": "用户注册"
+}
+},
+{
+"path": "pages/movie/detail",
+"style": {
+"navigationBarTitleText": "电影详情"
+}
+},
+{
+"path": "pages/order/create",
+"style": {
+"navigationBarTitleText": "创建订单"
+}
+},
+{
+"path": "pages/order/list",
+"style": {
+"navigationBarTitleText": "我的订单"
+}
+}
+],
+"globalStyle": {
+"navigationBarTextStyle": "black",
+"navigationBarTitleText": "电影票务系统",
+"navigationBarBackgroundColor": "#F8F8F8",
+"backgroundColor": "#F8F8F8"
+},
+"tabBar": {
+"color": "#7A7E83",
+"selectedColor": "#3cc51f",
+"borderStyle": "black",
+"backgroundColor": "#ffffff",
+"list": [
+{
+"pagePath": "pages/movie/list",
+"text": "电影"
+},
+{
+"pagePath": "pages/order/list",
+"text": "订单"
+}
+]
+}
+}

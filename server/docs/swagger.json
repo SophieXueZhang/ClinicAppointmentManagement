@@ -1677,9 +1677,7 @@
                                     "properties": {
                                         "data": {
                                             "type": "array",
-                                            "items": {
-                                                "type": "object"
-                                            }
+                                            "items": {}
                                         },
                                         "msg": {
                                             "type": "string"
@@ -4448,6 +4446,26 @@
                 }
             }
         },
+        "/sysExportTemplate/ExportTemplate": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SysExportTemplate"
+                ],
+                "summary": "导出表格模板",
+                "responses": {}
+            }
+        },
         "/sysExportTemplate/createSysExportTemplate": {
             "post": {
                 "security": [
@@ -4578,7 +4596,7 @@
                 "tags": [
                     "SysExportTemplate"
                 ],
-                "summary": "导出表格模板",
+                "summary": "导出表格",
                 "responses": {}
             }
         },
@@ -7929,6 +7947,10 @@
                     "description": "数据库连接端口",
                     "type": "string"
                 },
+                "template": {
+                    "description": "postgresql指定template",
+                    "type": "string"
+                },
                 "userName": {
                     "description": "数据库用户名",
                     "type": "string"
@@ -9066,5 +9088,14 @@
             "name": "x-token",
             "in": "header"
         }
-    }
+    },
+    "tags": [
+        {
+            "name": "Base"
+        },
+        {
+            "description": "用户",
+            "name": "SysUser"
+        }
+    ]
 }

@@ -1090,6 +1090,9 @@ definitions:
       port:
         description: 数据库连接端口
         type: string
+      template:
+        description: postgresql指定template
+        type: string
       userName:
         description: 数据库用户名
         type: string
@@ -2819,8 +2822,7 @@ paths:
             - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  items:
-                    type: object
+                  items: {}
                   type: array
                 msg:
                   type: string
@@ -4409,6 +4411,18 @@ paths:
       summary: 更新SysDictionaryDetail
       tags:
       - SysDictionaryDetail
+  /sysExportTemplate/ExportTemplate:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: 导出表格模板
+      tags:
+      - SysExportTemplate
   /sysExportTemplate/createSysExportTemplate:
     post:
       consumes:
@@ -4487,7 +4501,7 @@ paths:
       responses: {}
       security:
       - ApiKeyAuth: []
-      summary: 导出表格模板
+      summary: 导出表格
       tags:
       - SysExportTemplate
   /sysExportTemplate/findSysExportTemplate:
@@ -5543,3 +5557,7 @@ securityDefinitions:
     name: x-token
     type: apiKey
 swagger: "2.0"
+tags:
+- name: Base
+- description: 用户
+  name: SysUser

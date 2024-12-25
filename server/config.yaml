@@ -73,7 +73,7 @@ email:
 # system configuration
 system:
     env: local # 修改为public可以关闭路由日志输出
-    addr: 8888
+    addr: 9999
     db-type: mysql
     oss-type: local # 控制oss选择走本地还是 七牛等其他仓 自行增加其他oss仓可以在 server/utils/upload/upload.go 中 NewOss函数配置
     use-redis: false # 使用redis
@@ -93,7 +93,7 @@ captcha:
     key-long: 6
     img-width: 240
     img-height: 80
-    open-captcha: 0 # 0代表一直开启，大于0代表限制次数
+    open-captcha: -1 # 0代表一直开启，大于0代表限制次数
     open-captcha-timeout: 3600 # open-captcha大于0时才生效
 
 # mysql connect configuration
@@ -104,11 +104,11 @@ mysql:
     config: "charset=utf8mb4&parseTime=True&loc=Local"
     db-name: "gin_vue_admin"
     username: "root"
-    password: "root"
+    password: "123456"
     max-idle-conns: 10
     max-open-conns: 100
-    log-mode: ""
-    log-zap: false
+    log-mode: "info"
+    log-zap: true
 
 # pgsql connect configuration
 # 未初始化之前请勿手动修改数据库信息！！！如果一定要手动初始化请看（https://gin-vue-admin.com/docs/first_master）

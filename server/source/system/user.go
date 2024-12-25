@@ -2,6 +2,7 @@ package system
 
 import (
 	"context"
+	"fmt"
 	sysModel "github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	"github.com/flipped-aurora/gin-vue-admin/server/service/system"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
@@ -59,25 +60,40 @@ func (i *initUser) InitializeData(ctx context.Context) (next context.Context, er
 			UUID:        uuid.Must(uuid.NewV4()),
 			Username:    "admin",
 			Password:    adminPassword,
-			NickName:    "Mr.奇淼",
+			NickName:    "Administrator",
 			HeaderImg:   "https://qmplusimg.henrongyi.top/gva_header.jpg",
 			AuthorityId: 888,
 			Phone:       "17611111111",
-			Email:       "333333333@qq.com",
+			Email:       "admin@example.com",
+			Enable:      1,
 		},
-		{
-			UUID:        uuid.Must(uuid.NewV4()),
-			Username:    "a303176530",
-			Password:    password,
-			NickName:    "用户1",
-			HeaderImg:   "https:///qmplusimg.henrongyi.top/1572075907logo.png",
-			AuthorityId: 9528,
-			Phone:       "17611111111",
-			Email:       "333333333@qq.com"},
 	}
+	// Verify database connection
+	if err = db.Raw("SELECT 1").Error; err != nil {
+		fmt.Printf("Database connection error: %v\n", err)
+		return ctx, errors.Wrap(err, "数据库连接失败")
+	}
+
+	// Check if table exists
+	if !db.Migrator().HasTable(&sysModel.SysUser{}) {
+		fmt.Printf("Table %s does not exist\n", sysModel.SysUser{}.TableName())
+		return ctx, errors.New("用户表不存在")
+	}
+
+	// Create users with detailed error logging
 	if err = db.Create(&entities).Error; err != nil {
+		fmt.Printf("Failed to create users: %v\n", err)
 		return ctx, errors.Wrap(err, sysModel.SysUser{}.TableName()+"表数据初始化失败!")
 	}
+	fmt.Printf("Successfully created users: %v\n", entities)
+
+	// Verify user creation
+	var count int64
+	if err = db.Model(&sysModel.SysUser{}).Where("username = ?", "admin").Count(&count).Error; err != nil {
+		fmt.Printf("Failed to verify user creation: %v\n", err)
+		return ctx, errors.Wrap(err, "验证用户创建失败")
+	}
+	fmt.Printf("Found %d admin users after creation\n", count)
 	next = context.WithValue(ctx, i.InitializerName(), entities)
 	authorityEntities, ok := ctx.Value(new(initAuthority).InitializerName()).([]sysModel.SysAuthority)
 	if !ok {
@@ -98,7 +114,7 @@ func (i *initUser) DataInserted(ctx context.Context) bool {
 		return false
 	}
 	var record sysModel.SysUser
-	if errors.Is(db.Where("username = ?", "a303176530").
+	if errors.Is(db.Where("username = ?", "admin").
 		Preload("Authorities").First(&record).Error, gorm.ErrRecordNotFound) { // 判断是否存在数据
 		return false
 	}

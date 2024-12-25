@@ -52,7 +52,6 @@ func (i *initUser) InitializeData(ctx context.Context) (next context.Context, er
 		apStr = "123456"
 	}
 
-	password := utils.BcryptHash(apStr)
 	adminPassword := utils.BcryptHash(apStr)
 
 	entities := []sysModel.SysUser{
@@ -68,16 +67,10 @@ func (i *initUser) InitializeData(ctx context.Context) (next context.Context, er
 			Enable:      1,
 		},
 	}
-	// Verify database connection
-	if err = db.Raw("SELECT 1").Error; err != nil {
-		fmt.Printf("Database connection error: %v\n", err)
-		return ctx, errors.Wrap(err, "数据库连接失败")
-	}
 
-	// Check if table exists
-	if !db.Migrator().HasTable(&sysModel.SysUser{}) {
-		fmt.Printf("Table %s does not exist\n", sysModel.SysUser{}.TableName())
-		return ctx, errors.New("用户表不存在")
+	// Delete existing admin user if exists
+	if err = db.Where("username = ?", "admin").Delete(&sysModel.SysUser{}).Error; err != nil {
+		fmt.Printf("Failed to delete existing admin user: %v\n", err)
 	}
 
 	// Create users with detailed error logging
@@ -87,22 +80,12 @@ func (i *initUser) InitializeData(ctx context.Context) (next context.Context, er
 	}
 	fmt.Printf("Successfully created users: %v\n", entities)
 
-	// Verify user creation
-	var count int64
-	if err = db.Model(&sysModel.SysUser{}).Where("username = ?", "admin").Count(&count).Error; err != nil {
-		fmt.Printf("Failed to verify user creation: %v\n", err)
-		return ctx, errors.Wrap(err, "验证用户创建失败")
-	}
-	fmt.Printf("Found %d admin users after creation\n", count)
 	next = context.WithValue(ctx, i.InitializerName(), entities)
 	authorityEntities, ok := ctx.Value(new(initAuthority).InitializerName()).([]sysModel.SysAuthority)
 	if !ok {
 		return next, errors.Wrap(system.ErrMissingDependentContext, "创建 [用户-权限] 关联失败, 未找到权限表初始化数据")
 	}
 	if err = db.Model(&entities[0]).Association("Authorities").Replace(authorityEntities); err != nil {
-		return next, err
-	}
-	if err = db.Model(&entities[1]).Association("Authorities").Replace(authorityEntities[:1]); err != nil {
 		return next, err
 	}
 	return next, err

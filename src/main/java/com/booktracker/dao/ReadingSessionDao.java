@@ -1,86 +1,43 @@
 package com.booktracker.dao;
 
 import com.booktracker.model.ReadingSession;
-import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import com.booktracker.exception.BookTrackerException;
 
-public class ReadingSessionDao {
-    private final DatabaseManager dbManager;
-    private String username = "default";
+/**
+ * 阅读会话数据访问接口
+ */
+public interface ReadingSessionDao {
+    /**
+     * 设置用户名
+     * @param username 用户名
+     */
+    void setUsername(String username);
 
-    public ReadingSessionDao() {
-        this.dbManager = DatabaseManager.getInstance();
-    }
+    /**
+     * 创建新的阅读会话记录
+     * @param session 要创建的阅读会话对象
+     * @throws BookTrackerException 如果创建过程中发生错误
+     */
+    void create(ReadingSession session) throws BookTrackerException;
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void create(ReadingSession session) throws SQLException {
-        String sql = "INSERT INTO reading_sessions (book_id, user_id, start_time, end_time, pages_read) " +
-                    "VALUES (?, ?, ?, ?, ?)";
-        try (Connection conn = dbManager.getConnection(username);
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setLong(1, session.getBookId());
-            stmt.setLong(2, session.getUserId());
-            stmt.setTimestamp(3, Timestamp.valueOf(session.getStartTime()));
-            stmt.setTimestamp(4, Timestamp.valueOf(session.getEndTime()));
-            stmt.setInt(5, session.getPagesRead());
-            stmt.executeUpdate();
-
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    session.setId(rs.getLong(1));
-                }
-            }
-        }
-    }
-
-    public List<ReadingSession> findByBookAndUser(Long bookId, Long userId) throws SQLException {
-        List<ReadingSession> sessions = new ArrayList<>();
-        String sql = "SELECT * FROM reading_sessions WHERE book_id = ? AND user_id = ? ORDER BY start_time DESC";
-        try (Connection conn = dbManager.getConnection(username);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, bookId);
-            stmt.setLong(2, userId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    sessions.add(mapResultSetToSession(rs));
-                }
-            }
-        }
-        return sessions;
-    }
-
-    public List<ReadingSession> findByUserInTimeRange(Long userId, LocalDateTime start, LocalDateTime end) 
-            throws SQLException {
-        List<ReadingSession> sessions = new ArrayList<>();
-        String sql = "SELECT * FROM reading_sessions WHERE user_id = ? AND start_time >= ? AND end_time <= ? " +
-                    "ORDER BY start_time DESC";
-        try (Connection conn = dbManager.getConnection(username);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, userId);
-            stmt.setTimestamp(2, Timestamp.valueOf(start));
-            stmt.setTimestamp(3, Timestamp.valueOf(end));
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    sessions.add(mapResultSetToSession(rs));
-                }
-            }
-        }
-        return sessions;
-    }
-
-    private ReadingSession mapResultSetToSession(ResultSet rs) throws SQLException {
-        ReadingSession session = new ReadingSession();
-        session.setId(rs.getLong("id"));
-        session.setBookId(rs.getLong("book_id"));
-        session.setUserId(rs.getLong("user_id"));
-        session.setStartTime(rs.getTimestamp("start_time").toLocalDateTime());
-        session.setEndTime(rs.getTimestamp("end_time").toLocalDateTime());
-        session.setPagesRead(rs.getInt("pages_read"));
-        return session;
-    }
+    /**
+     * 查找指定图书和用户的所有阅读会话
+     * @param bookId 图书ID
+     * @param userId 用户ID
+     * @return 阅读会话列表
+     * @throws BookTrackerException 如果查询过程中发生错误
+     */
+    List<ReadingSession> findByBookAndUser(Long bookId, Long userId) throws BookTrackerException;
+    /**
+     * 查找指定用户在时间范围内的所有阅读会话
+     * @param userId 用户ID
+     * @param start 开始时间
+     * @param end 结束时间
+     * @return 阅读会话列表
+     * @throws BookTrackerException 如果查询过程中发生错误
+     */
+    List<ReadingSession> findByUserInTimeRange(Long userId, LocalDateTime start, LocalDateTime end) 
+            throws BookTrackerException;
 }

@@ -1,94 +1,45 @@
 package com.booktracker.dao;
 
 import com.booktracker.model.ReadingProgress;
-import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
+import com.booktracker.exception.BookTrackerException;
 
-public class ReadingProgressDao {
-    private final DatabaseManager dbManager;
-    private String username = "default";
+/**
+ * 阅读进度数据访问接口
+ */
+public interface ReadingProgressDao {
+    /**
+     * 设置用户名
+     * @param username 用户名
+     */
+    void setUsername(String username);
 
-    public ReadingProgressDao() {
-        this.dbManager = DatabaseManager.getInstance();
-    }
+    /**
+     * 创建新的阅读进度记录
+     * @param progress 要创建的阅读进度对象
+     * @throws BookTrackerException 如果创建过程中发生错误
+     */
+    void create(ReadingProgress progress) throws BookTrackerException;
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void create(ReadingProgress progress) throws SQLException {
-        String sql = "INSERT INTO reading_progress (book_id, user_id, current_page, progress_percentage, last_read_date) " +
-                    "VALUES (?, ?, ?, ?, ?)";
-        try (Connection conn = dbManager.getConnection(username);
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setLong(1, progress.getBookId());
-            stmt.setLong(2, progress.getUserId());
-            stmt.setInt(3, progress.getCurrentPage());
-            stmt.setDouble(4, progress.getProgressPercentage());
-            stmt.setTimestamp(5, Timestamp.valueOf(progress.getLastReadDate()));
-            stmt.executeUpdate();
-
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    progress.setId(rs.getLong(1));
-                }
-            }
-        }
-    }
-
-    public ReadingProgress findByBookAndUser(Long bookId, Long userId) throws SQLException {
-        String sql = "SELECT * FROM reading_progress WHERE book_id = ? AND user_id = ?";
-        try (Connection conn = dbManager.getConnection(username);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, bookId);
-            stmt.setLong(2, userId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return mapResultSetToProgress(rs);
-                }
-            }
-        }
-        return null;
-    }
-
-    public List<ReadingProgress> findByUser(Long userId) throws SQLException {
-        List<ReadingProgress> progressList = new ArrayList<>();
-        String sql = "SELECT * FROM reading_progress WHERE user_id = ? ORDER BY last_read_date DESC";
-        try (Connection conn = dbManager.getConnection(username);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, userId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    progressList.add(mapResultSetToProgress(rs));
-                }
-            }
-        }
-        return progressList;
-    }
-
-    public void update(ReadingProgress progress) throws SQLException {
-        String sql = "UPDATE reading_progress SET current_page = ?, progress_percentage = ?, " +
-                    "last_read_date = ? WHERE book_id = ? AND user_id = ?";
-        try (Connection conn = dbManager.getConnection(username);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, progress.getCurrentPage());
-            stmt.setDouble(2, progress.getProgressPercentage());
-            stmt.setTimestamp(3, Timestamp.valueOf(progress.getLastReadDate()));
-            stmt.setLong(4, progress.getBookId());
-            stmt.setLong(5, progress.getUserId());
-            stmt.executeUpdate();
-        }
-    }
-
-    private ReadingProgress mapResultSetToProgress(ResultSet rs) throws SQLException {
-        ReadingProgress progress = new ReadingProgress();
-        progress.setId(rs.getLong("id"));
-        progress.setBookId(rs.getLong("book_id"));
-        progress.setUserId(rs.getLong("user_id"));
-        progress.setCurrentPage(rs.getInt("current_page"));
-        progress.setProgressPercentage(rs.getDouble("progress_percentage"));
-        progress.setLastReadDate(rs.getTimestamp("last_read_date").toLocalDateTime());
-        return progress;
-    }
+    /**
+     * 根据图书ID和用户ID查找阅读进度
+     * @param bookId 图书ID
+     * @param userId 用户ID
+     * @return 阅读进度对象，如果未找到返回null
+     * @throws BookTrackerException 如果查询过程中发生错误
+     */
+    ReadingProgress findByBookAndUser(Long bookId, Long userId) throws BookTrackerException;
+    /**
+     * 查找用户的所有阅读进度
+     * @param userId 用户ID
+     * @return 阅读进度列表
+     * @throws BookTrackerException 如果查询过程中发生错误
+     */
+    List<ReadingProgress> findByUser(Long userId) throws BookTrackerException;
+    /**
+     * 更新阅读进度
+     * @param progress 要更新的阅读进度对象
+     * @throws BookTrackerException 如果更新过程中发生错误
+     */
+    void update(ReadingProgress progress) throws BookTrackerException;
 }

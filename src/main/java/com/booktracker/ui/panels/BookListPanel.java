@@ -1,6 +1,8 @@
 package com.booktracker.ui.panels;
 
 import com.booktracker.model.Book;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.booktracker.model.ReadingProgress;
 import com.booktracker.service.BookService;
 import com.booktracker.service.ReadingService;
@@ -12,7 +14,28 @@ import java.awt.*;
 import java.sql.SQLException;
 import java.util.List;
 
+/**
+ * 图书列表面板类，显示用户的图书清单和阅读进度
+ * 
+ * 该面板提供以下功能：
+ * - 以表格形式显示图书信息（书名、作者、页数等）
+ * - 显示每本书的阅读进度
+ * - 提供添加、编辑、删除图书的功能
+ * - 支持更新阅读进度
+ * - 自动刷新显示最新数据
+ * 
+ * 面板包含工具栏和可滚动的表格视图，通过BookService和ReadingService
+ * 与数据层交互
+ * 
+ * @author Devin AI
+ * @version 1.0
+ * @see BookDialog
+ * @see ReadingSessionDialog
+ * @see BookService
+ * @see ReadingService
+ */
 public class BookListPanel extends JPanel {
+    private static final Logger logger = LoggerFactory.getLogger(BookListPanel.class);
     private void showAddBookDialog() {
         BookDialog dialog = new BookDialog((JFrame) SwingUtilities.getWindowAncestor(this), "添加新书");
         dialog.setVisible(true);
@@ -25,6 +48,7 @@ public class BookListPanel extends JPanel {
                 );
                 refreshBookList();
             } catch (SQLException e) {
+                logger.error("添加图书失败", e);
                 JOptionPane.showMessageDialog(this,
                     "添加图书失败: " + e.getMessage(),
                     "错误",
@@ -58,6 +82,7 @@ public class BookListPanel extends JPanel {
                 refreshBookList();
             }
         } catch (SQLException e) {
+            logger.error("编辑图书失败", e);
             JOptionPane.showMessageDialog(this,
                 "编辑图书失败: " + e.getMessage(),
                 "错误",
@@ -83,6 +108,7 @@ public class BookListPanel extends JPanel {
                 bookService.deleteBook(book.getId());
                 refreshBookList();
             } catch (SQLException e) {
+                logger.error("删除图书失败", e);
                 JOptionPane.showMessageDialog(this,
                     "删除图书失败: " + e.getMessage(),
                     "错误",
@@ -122,6 +148,7 @@ public class BookListPanel extends JPanel {
                 refreshBookList();
             }
         } catch (SQLException e) {
+            logger.error("更新阅读进度失败", e);
             JOptionPane.showMessageDialog(this,
                 "更新阅读进度失败: " + e.getMessage(),
                 "错误",
@@ -153,6 +180,7 @@ public class BookListPanel extends JPanel {
                 });
             }
         } catch (SQLException e) {
+            logger.error("刷新图书列表失败", e);
             JOptionPane.showMessageDialog(this,
                 "刷新图书列表失败: " + e.getMessage(),
                 "错误",
@@ -169,6 +197,16 @@ public class BookListPanel extends JPanel {
         String.class, String.class, Integer.class, Integer.class, String.class, Book.class
     };
 
+    /**
+     * 创建并初始化图书列表面板
+     * 
+     * 初始化过程包括：
+     * - 设置面板布局为BorderLayout
+     * - 创建服务层实例
+     * - 设置当前用户
+     * - 初始化UI组件
+     * - 刷新图书列表数据
+     */
     public BookListPanel() {
         setLayout(new BorderLayout());
         this.bookService = new BookService();

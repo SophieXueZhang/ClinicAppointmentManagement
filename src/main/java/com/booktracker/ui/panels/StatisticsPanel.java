@@ -1,6 +1,8 @@
 package com.booktracker.ui.panels;
 
 import com.booktracker.model.Book;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.booktracker.service.BookService;
 import com.booktracker.service.ReadingService;
 import javax.swing.*;
@@ -12,7 +14,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 统计信息面板类，显示用户的阅读统计数据
+ * 
+ * 该面板提供以下功能：
+ * - 显示总阅读时间
+ * - 统计已读页数
+ * - 计算已完成图书数量
+ * - 分析平均阅读速度
+ * - 计算图书完成率
+ * - 统计每日平均阅读时长
+ * 
+ * 支持按不同时间范围（日、周、月、全部）查看统计数据
+ * 所有数据都可以实时刷新
+ * 
+ * @author Devin AI
+ * @version 1.0
+ * @see BookService
+ * @see ReadingService
+ */
 public class StatisticsPanel extends JPanel {
+    private static final Logger logger = LoggerFactory.getLogger(StatisticsPanel.class);
     private JPanel statsContainer;
     private final ReadingService readingService;
     private final BookService bookService;
@@ -20,6 +42,17 @@ public class StatisticsPanel extends JPanel {
     private final Map<String, JLabel> statLabels;
     private JComboBox<String> timeRangeCombo;
     
+    /**
+     * 创建并初始化统计信息面板
+     * 
+     * 初始化过程包括：
+     * - 设置面板布局为BorderLayout
+     * - 创建服务层实例
+     * - 初始化统计标签映射
+     * - 设置当前用户
+     * - 初始化UI组件
+     * - 刷新统计数据
+     */
     public StatisticsPanel() {
         setLayout(new BorderLayout());
         this.readingService = new ReadingService();
@@ -136,6 +169,7 @@ public class StatisticsPanel extends JPanel {
                 totalHours / Math.max(1, java.time.Duration.between(startTime, now).toDays())));
             
         } catch (SQLException e) {
+            logger.error("获取统计数据失败", e);
             JOptionPane.showMessageDialog(this,
                 "获取统计数据失败: " + e.getMessage(),
                 "错误",

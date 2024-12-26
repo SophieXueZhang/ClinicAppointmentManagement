@@ -5,11 +5,32 @@ import com.booktracker.ui.panels.StatisticsPanel;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * 图书阅读进度跟踪系统的主窗口类
+ * 
+ * 该类负责创建和管理应用程序的主要图形界面，包括：
+ * - 分割面板布局，左侧显示图书列表，右侧显示统计信息
+ * - 主菜单栏，提供文件、图书库、阅读进度和帮助等功能
+ * - 用户界面组件的初始化和布局管理
+ * 
+ * 窗口布局采用JSplitPane进行左右分割，默认比例为7:3
+ * 
+ * @author Devin AI
+ * @version 1.0
+ * @see BookListPanel
+ * @see StatisticsPanel
+ */
 public class MainWindow extends JFrame {
     private JMenuBar menuBar;
     private BookListPanel bookListPanel;
     private StatisticsPanel statisticsPanel;
 
+    /**
+     * 创建并初始化主窗口
+     * 
+     * 设置窗口的基本属性，包括标题、关闭操作、大小和位置
+     * 初始化所有UI组件并创建菜单栏
+     */
     public MainWindow() {
         setTitle("图书阅读进度跟踪系统");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -20,6 +41,12 @@ public class MainWindow extends JFrame {
         createMenuBar();
     }
     
+    /**
+     * 初始化主窗口的组件
+     * 
+     * 创建分割面板并添加图书列表和统计面板
+     * 设置面板的分割比例为7:3
+     */
     private void initializeComponents() {
         // Create main container with split pane
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -40,6 +67,15 @@ public class MainWindow extends JFrame {
         setContentPane(splitPane);
     }
     
+    /**
+     * 创建并初始化菜单栏
+     * 
+     * 创建以下菜单项：
+     * - 文件菜单：包含用户切换和退出功能
+     * - 图书库菜单：包含图书管理相关功能
+     * - 阅读进度菜单：包含阅读会话和统计功能
+     * - 帮助菜单：包含使用说明和关于信息
+     */
     private void createMenuBar() {
         menuBar = new JMenuBar();
         

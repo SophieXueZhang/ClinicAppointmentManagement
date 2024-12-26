@@ -13,8 +13,26 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import javax.sql.DataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.booktracker.exception.BookTrackerException;
 
+/**
+ * 数据库管理器类，负责处理所有数据库连接和初始化操作
+ * 
+ * 该类实现了单例模式，主要功能包括：
+ * - 管理数据库连接池
+ * - 为每个用户创建独立的数据库实例
+ * - 处理数据库初始化和模式创建
+ * - 管理数据源生命周期
+ * 
+ * 使用HikariCP连接池来优化数据库连接性能
+ * 
+ * @author Devin AI
+ * @version 1.0
+ */
 public class DatabaseManager {
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseManager.class);
     private static DatabaseManager instance;
     private final Map<String, DataSource> dataSources;
     private static final String BASE_PATH = "data/users";
@@ -36,7 +54,8 @@ public class DatabaseManager {
         try {
             Files.createDirectories(Paths.get(BASE_PATH));
         } catch (Exception e) {
-            throw new RuntimeException("Failed to create base directory", e);
+            logger.error("创建基础目录失败", e);
+            throw new BookTrackerException("创建基础目录失败: 请确保应用程序具有写入权限", e);
         }
     }
 
@@ -68,7 +87,8 @@ public class DatabaseManager {
             initializeDatabase(ds);
             return ds;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to create data source for user: " + username, e);
+            logger.error("为用户创建数据源失败: {}", username, e);
+            throw new BookTrackerException("为用户'" + username + "'创建数据源失败: 请检查数据库配置和权限", e);
         }
     }
 
@@ -110,7 +130,8 @@ public class DatabaseManager {
                 conn.setAutoCommit(true);
             }
         } catch (Exception e) {
-            throw new RuntimeException("Failed to initialize database", e);
+            logger.error("初始化数据库失败", e);
+            throw new BookTrackerException("初始化数据库失败: 请检查数据库架构文件和权限", e);
         }
     }
 

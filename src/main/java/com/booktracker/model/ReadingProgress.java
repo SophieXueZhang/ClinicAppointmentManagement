@@ -2,6 +2,22 @@ package com.booktracker.model;
 
 import java.time.LocalDateTime;
 
+/**
+ * 阅读进度实体类，记录用户对特定图书的阅读进度
+ * 
+ * 该类跟踪：
+ * - 当前阅读页数
+ * - 阅读进度百分比
+ * - 最后阅读时间
+ * 
+ * 通过bookId和userId关联特定用户的特定图书
+ * 进度百分比自动根据当前页数和总页数计算
+ * 
+ * @author Devin AI
+ * @version 1.0
+ * @see Book
+ * @see User
+ */
 public class ReadingProgress {
     private Long id;
     private Long bookId;

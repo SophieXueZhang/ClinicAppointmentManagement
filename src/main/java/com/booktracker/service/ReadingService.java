@@ -28,81 +28,120 @@ public class ReadingService {
         this.currentUserId = userId;
     }
 
-    public void updateReadingProgress(Long bookId, int currentPage, int totalPages) throws SQLException {
-        ReadingProgress progress = progressDao.findByBookAndUser(bookId, currentUserId);
-        if (progress == null) {
-            progress = new ReadingProgress(bookId, currentUserId, currentPage, totalPages);
-            progressDao.create(progress);
-        } else {
-            progress.setCurrentPage(currentPage);
-            progress.setProgressPercentage((double) currentPage / totalPages * 100);
-            progress.setLastReadDate(LocalDateTime.now());
-            progressDao.update(progress);
+    public void updateReadingProgress(Long bookId, int currentPage, int totalPages) {
+        try {
+            ReadingProgress progress = progressDao.findByBookAndUser(bookId, currentUserId);
+            if (progress == null) {
+                progress = new ReadingProgress(bookId, currentUserId, currentPage, totalPages);
+                progressDao.create(progress);
+            } else {
+                progress.setCurrentPage(currentPage);
+                progress.setProgressPercentage((double) currentPage / totalPages * 100);
+                progress.setLastReadDate(LocalDateTime.now());
+                progressDao.update(progress);
+            }
+        } catch (SQLException e) {
+            throw new BookTrackerException("更新阅读进度失败: 图书ID " + bookId, e);
         }
     }
 
     public void recordReadingSession(Long bookId, LocalDateTime startTime, LocalDateTime endTime, 
-                                   int startPage, int endPage) throws SQLException {
-        ReadingSession session = new ReadingSession(
-            bookId,
-            currentUserId,
-            startTime,
-            endTime,
-            endPage - startPage
-        );
-        sessionDao.create(session);
-        updateReadingProgress(bookId, endPage, getBookTotalPages(bookId));
-    }
-
-    public List<ReadingSession> getReadingSessions(Long bookId) throws SQLException {
-        return sessionDao.findByBookAndUser(bookId, currentUserId);
-    }
-
-    public List<ReadingSession> getReadingSessionsInTimeRange(LocalDateTime start, LocalDateTime end) 
-            throws SQLException {
-        return sessionDao.findByUserInTimeRange(currentUserId, start, end);
-    }
-
-    public ReadingProgress getReadingProgress(Long bookId) throws SQLException {
-        return progressDao.findByBookAndUser(bookId, currentUserId);
-    }
-
-    private int getBookTotalPages(Long bookId) throws SQLException {
-        Book book = bookDao.findById(bookId);
-        return book != null ? book.getTotalPages() : 0;
-    }
-
-    public double calculateAverageReadingSpeed(Long bookId) throws SQLException {
-        List<ReadingSession> sessions = getReadingSessions(bookId);
-        if (sessions.isEmpty()) {
-            return 0.0;
+                                   int startPage, int endPage) {
+        try {
+            ReadingSession session = new ReadingSession(
+                bookId,
+                currentUserId,
+                startTime,
+                endTime,
+                endPage - startPage
+            );
+            sessionDao.create(session);
+            updateReadingProgress(bookId, endPage, getBookTotalPages(bookId));
+        } catch (SQLException e) {
+            throw new BookTrackerException("记录阅读会话失败: 图书ID " + bookId, e);
         }
+    }
 
-        int totalPagesRead = 0;
-        double totalHours = 0.0;
-
-        for (ReadingSession session : sessions) {
-            totalPagesRead += session.getPagesRead();
-            totalHours += session.getDuration().toMinutes() / 60.0;
+    public List<ReadingSession> getReadingSessions(Long bookId) {
+        try {
+            return sessionDao.findByBookAndUser(bookId, currentUserId);
+        } catch (SQLException e) {
+            throw new BookTrackerException("获取阅读会话记录失败: 图书ID " + bookId, e);
         }
-
-        return totalHours > 0 ? totalPagesRead / totalHours : 0.0;
     }
 
-    public double calculateCompletionRate(Long bookId) throws SQLException {
-        ReadingProgress progress = getReadingProgress(bookId);
-        return progress != null ? progress.getProgressPercentage() : 0.0;
+    public List<ReadingSession> getReadingSessionsInTimeRange(LocalDateTime start, LocalDateTime end) {
+        try {
+            return sessionDao.findByUserInTimeRange(currentUserId, start, end);
+        } catch (SQLException e) {
+            throw new BookTrackerException("获取时间范围内的阅读会话记录失败", e);
+        }
     }
 
-    public int getTotalPagesRead(LocalDateTime start, LocalDateTime end) throws SQLException {
-        List<ReadingSession> sessions = getReadingSessionsInTimeRange(start, end);
-        return sessions.stream().mapToInt(ReadingSession::getPagesRead).sum();
+    public ReadingProgress getReadingProgress(Long bookId) {
+        try {
+            return progressDao.findByBookAndUser(bookId, currentUserId);
+        } catch (SQLException e) {
+            throw new BookTrackerException("获取阅读进度失败: 图书ID " + bookId, e);
+        }
     }
 
-    public double getTotalReadingHours(LocalDateTime start, LocalDateTime end) throws SQLException {
-        List<ReadingSession> sessions = getReadingSessionsInTimeRange(start, end);
-        return sessions.stream()
-            .mapToDouble(session -> session.getDuration().toMinutes() / 60.0)
-            .sum();
+    private int getBookTotalPages(Long bookId) {
+        try {
+            Book book = bookDao.findById(bookId);
+            return book != null ? book.getTotalPages() : 0;
+        } catch (SQLException e) {
+            throw new BookTrackerException("获取图书总页数失败: 图书ID " + bookId, e);
+        }
+    }
+
+    public double calculateAverageReadingSpeed(Long bookId) {
+        try {
+            List<ReadingSession> sessions = getReadingSessions(bookId);
+            if (sessions.isEmpty()) {
+                return 0.0;
+            }
+
+            int totalPagesRead = 0;
+            double totalHours = 0.0;
+
+            for (ReadingSession session : sessions) {
+                totalPagesRead += session.getPagesRead();
+                totalHours += session.getDuration().toMinutes() / 60.0;
+            }
+
+            return totalHours > 0 ? totalPagesRead / totalHours : 0.0;
+        } catch (Exception e) {
+            throw new BookTrackerException("计算平均阅读速度失败: 图书ID " + bookId, e);
+        }
+    }
+
+    public double calculateCompletionRate(Long bookId) {
+        try {
+            ReadingProgress progress = getReadingProgress(bookId);
+            return progress != null ? progress.getProgressPercentage() : 0.0;
+        } catch (Exception e) {
+            throw new BookTrackerException("计算完成率失败: 图书ID " + bookId, e);
+        }
+    }
+
+    public int getTotalPagesRead(LocalDateTime start, LocalDateTime end) {
+        try {
+            List<ReadingSession> sessions = getReadingSessionsInTimeRange(start, end);
+            return sessions.stream().mapToInt(ReadingSession::getPagesRead).sum();
+        } catch (Exception e) {
+            throw new BookTrackerException("获取总阅读页数失败", e);
+        }
+    }
+
+    public double getTotalReadingHours(LocalDateTime start, LocalDateTime end) {
+        try {
+            List<ReadingSession> sessions = getReadingSessionsInTimeRange(start, end);
+            return sessions.stream()
+                .mapToDouble(session -> session.getDuration().toMinutes() / 60.0)
+                .sum();
+        } catch (Exception e) {
+            throw new BookTrackerException("获取总阅读时间失败", e);
+        }
     }
 }

@@ -11,7 +11,7 @@ import com.booktracker.ui.dialogs.ReadingSessionDialog;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.sql.SQLException;
+import com.booktracker.exception.BookTrackerException;
 import java.util.List;
 
 /**
@@ -47,7 +47,7 @@ public class BookListPanel extends JPanel {
                     dialog.getTotalPages()
                 );
                 refreshBookList();
-            } catch (SQLException e) {
+            } catch (BookTrackerException e) {
                 logger.error("添加图书失败", e);
                 JOptionPane.showMessageDialog(this,
                     "添加图书失败: " + e.getMessage(),
@@ -81,7 +81,7 @@ public class BookListPanel extends JPanel {
                 );
                 refreshBookList();
             }
-        } catch (SQLException e) {
+        } catch (BookTrackerException e) {
             logger.error("编辑图书失败", e);
             JOptionPane.showMessageDialog(this,
                 "编辑图书失败: " + e.getMessage(),
@@ -107,7 +107,7 @@ public class BookListPanel extends JPanel {
                 Book book = (Book) bookTable.getValueAt(selectedRow, 5);
                 bookService.deleteBook(book.getId());
                 refreshBookList();
-            } catch (SQLException e) {
+            } catch (BookTrackerException e) {
                 logger.error("删除图书失败", e);
                 JOptionPane.showMessageDialog(this,
                     "删除图书失败: " + e.getMessage(),
@@ -147,7 +147,7 @@ public class BookListPanel extends JPanel {
                 );
                 refreshBookList();
             }
-        } catch (SQLException e) {
+        } catch (BookTrackerException e) {
             logger.error("更新阅读进度失败", e);
             JOptionPane.showMessageDialog(this,
                 "更新阅读进度失败: " + e.getMessage(),
@@ -179,7 +179,7 @@ public class BookListPanel extends JPanel {
                     String.format("%.1f%%", progressPercent)
                 });
             }
-        } catch (SQLException e) {
+        } catch (BookTrackerException e) {
             logger.error("刷新图书列表失败", e);
             JOptionPane.showMessageDialog(this,
                 "刷新图书列表失败: " + e.getMessage(),

@@ -3,6 +3,10 @@ package com.booktracker.service;
 import com.booktracker.dao.BookDao;
 import com.booktracker.dao.ReadingProgressDao;
 import com.booktracker.dao.ReadingSessionDao;
+import com.booktracker.dao.impl.BookDaoImpl;
+import com.booktracker.dao.impl.ReadingProgressDaoImpl;
+import com.booktracker.dao.impl.ReadingSessionDaoImpl;
+import com.booktracker.exception.BookTrackerException;
 import com.booktracker.model.Book;
 import com.booktracker.model.ReadingProgress;
 import com.booktracker.model.ReadingSession;
@@ -19,9 +23,9 @@ public class ReadingService {
     private Long currentUserId;
 
     public ReadingService() {
-        this.bookDao = new BookDao();
-        this.progressDao = new ReadingProgressDao();
-        this.sessionDao = new ReadingSessionDao();
+        this.bookDao = new BookDaoImpl();
+        this.progressDao = new ReadingProgressDaoImpl();
+        this.sessionDao = new ReadingSessionDaoImpl();
     }
 
     public void setCurrentUser(Long userId) {

@@ -45,3 +45,4 @@ public interface BookDao {
      * @throws BookTrackerException 如果删除过程中发生错误
      */
     void delete(Long id) throws BookTrackerException;
+}

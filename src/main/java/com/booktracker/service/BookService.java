@@ -1,9 +1,10 @@
 package com.booktracker.service;
 
 import com.booktracker.dao.BookDao;
+import com.booktracker.dao.impl.BookDaoImpl;
 import com.booktracker.model.Book;
+import com.booktracker.exception.BookTrackerException;
 
-import java.sql.SQLException;
 import java.util.List;
 import com.booktracker.exception.BookTrackerException;
 
@@ -11,7 +12,7 @@ public class BookService {
     private final BookDao bookDao;
 
     public BookService() {
-        this.bookDao = new BookDao();
+        this.bookDao = new BookDaoImpl();
     }
 
     public void addBook(String title, String author, int totalPages) {

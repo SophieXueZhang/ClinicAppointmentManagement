@@ -81,8 +81,8 @@ public class ReadingServiceTest {
 
     @Test
     void testRecordReadingSession_DatabaseError() throws SQLException {
-        when(sessionDao.create(any(ReadingSession.class)))
-            .thenThrow(new SQLException("数据库连接失败"));
+        doThrow(new SQLException("数据库连接失败"))
+            .when(sessionDao).create(any(ReadingSession.class));
 
         LocalDateTime startTime = LocalDateTime.now().minusHours(1);
         LocalDateTime endTime = LocalDateTime.now();

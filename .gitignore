@@ -1,0 +1,6 @@
+
+# Build artifacts
+target/
+
+# Test data
+data/
